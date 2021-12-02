@@ -1,0 +1,228 @@
+---
+title: "Spracovanie a analýza dát spoločnosti Yelp"
+author: Jakub Hrbáň
+output: 
+  revealjs::revealjs_presentation:
+    center: true
+    theme: sky
+    self_contained: true
+    slide_level: 2
+    css: styles.css
+    reveal_options:
+      minScale: 1.0
+      maxScale: 1.0
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,include = FALSE,fig.path = "figure/", fig.align = "center")
+# knitr::opts_knit$set(root.dir = "../..") # ked o viac /..
+```
+
+
+# Obsah prezentácie
+
+- Predstavenie dát
+
+- Úvodné komplikácie a ich riešenie
+
+- Analýza dát - biznis pohľad
+
+- NLP + vizualizácie
+
+- ML + interpretácia výsledkov
+
+- Záver
+
+
+
+# Predstavenie dát
+
+* Recenzie spoločností z oblasti služieb, gastronómie a voľnočasových aktivít 
+
+* Dáta získané zo stránky spoločnosti [Yelp](https://www.yelp.com/dataset) - celosvetová firma zameraná na uverejňovanie recenzií od používateľov
+
+* 6 datasetov:
+    + o spoločnostiach
+    + o používateľoch
+    + recenzie používateľov
+    + fotografie od používateľov z miesta činu
+    + tipy - kratšie ako recenzie
+    + zaznamenané check-iny používateľov
+
+
+
+# Úvodné komplikácie a ich riešenie
+
+* Dáta vo formáte .json 
+
+* Komplikovaná štruktúra na spracovanie dát $\rightarrow$ potrebná transformácia
+
+* Problém s pamäťou pri načítaní datasetov o zákazníkoch a používateľoch - veľkosť súborov
+
+* Riešenie: použitie distribuovaného prostredia na transformáciu formátu .json do viacerých menších .csv súborov
+
+
+
+## Spark - distribuované prostredie
+
+* Efektívnejšia práca s datasetmi
+
+* Možnosť paralelných výpočtov
+
+* Zapojenie viacerých jadier naraz
+
+
+
+# Analýza dát - biznis pohľad
+
+* Bližší náhľad na recenzie reštaurácií - vysoká možná pridaná hodnota
+
+* Vybrané len tie, ktoré sú aktuálne otvorené
+
+* Úprava zle zaradených reštaurácií podľa miesta výskytu - robilo problémy pri vizualizácii
+
+
+
+## Analýza dát - biznis pohľad
+
+* Vizualizácia agregovaného počtu reštaurácií v rámci jednotlivých štátov
+
+![predikcia_flowchart](Obrázky/Map_aggr.png)
+
+
+
+
+## Analýza dát - biznis pohľad
+
+* Vizualizácia agregovaného počtu reštaurácií v rámci jednotlivých štátov
+
+![predikcia_flowchart](Obrázky/Map_5stars.png)
+
+
+
+
+## Analýza dát - biznis pohľad
+
+* Zoznam najväčších influencerov vzhľadom na počet užitočných recenzií (označené inými užívateľmi), počet fanúšikov a pomeru užitočných recenií/počet recenzií
+
+![predikcia_flowchart](Obrázky/Influencers.png)
+
+
+
+
+# NLP + vizualizácie
+
+![predikcia_flowchart](Obrázky/Wordcloud.png)
+
+
+
+## NLP + vizualizácie
+
+* Výzva: spracovanie textových dát za účelom vyťaženia užitočných informácií pre reštaurácie
+
+* Filtrovanie recenzií vzhľadom na reštaurácie
+
+* NLP workflow: 
+
+![predikcia_flowchart](Obrázky/Workflow.png)
+
+
+
+## NLP + vizualizácie
+
+* Uvedenie konkrétneho príkladu z dát
+
+![predikcia_flowchart](Obrázky/Workflow_konkretne.png)
+
+
+## NLP + vizualizácie
+
+* Na tokenizáciu použité dve metódy:
+    - tf $\rightarrow$ term-frequency: početnosť slov vrámci vety
+    - tf_idf $\rightarrow$ term-frequency inverse document frequency: prevrátená početnosť slov naprieč všetkými dokumentami
+    
+* Výhoda druhej metódy v prípade, že sa snažíme hľadať unikátne použité výrazy
+
+
+
+## NLP + vizualizácie
+
+* 10 najčastejšie používaných slov v závislosti od počtu rozdaných hviezdičiek reštauráciam užívateľmi
+
+![predikcia_flowchart](Obrázky/top10words.png)
+
+
+
+## NLP + vizualizácie
+
+* 10 najčastejšie používaných slov v rámci rozdaných hviezdičiek reštauráciam, ak v tej kategórii bolo slovo najfrekventovanejšie 
+
+![predikcia_flowchart](Obrázky/top10words_unique.png)
+
+
+
+# ML + interpretácia
+
+* Použitie výstupných dát z metód tf, respektíve tf_idf + pridanie 3 premenných hodnotiace danú recenziu
+
+* Snaha klasifikácie dát podľa hodnotenia hviezdičkami
+
+* Použitie nasledovných metód strojového učenia:
+    - random forest
+    - xgboost
+    - logistická regresia
+    - neurónová sieť
+    
+* Hodnotiace metriky:
+    - accuracy: počet úspešne zaradených/ všetky pozorovnia (snaha dosiahnuť čo najvyššiu)
+    - cross-entropy: metrika značiaca ne/istotu zaradenia (snaha dosiahnuť čo najnižšiu)
+    
+    
+    
+## ML + interpretácia
+
+* Výsledky úspešnosti ML metód
+
+* S použitím tf metódy 
+
+![predikcia_flowchart](Obrázky/res_tf.png)
+
+* S použitím tf_idf metódy
+
+![predikcia_flowchart](Obrázky/res_tf_idf.png)
+
+## ML + interpretácia
+
+* dôležitosť premenných určených metódou **random forest**
+
+![predikcia_flowchart](Obrázky/varimp_rf.png)
+
+
+
+
+## ML + interpretácia
+
+* dôležitosť premenných určených metódou **xgboost**
+
+![predikcia_flowchart](Obrázky/varimp_xgb.png)
+
+
+## ML + interpretácia
+
+* dôležitosť premenných určených metódou **logistická regresia**
+
+![predikcia_flowchart](Obrázky/varimp_lr.png)
+
+
+## ML + interpretácia
+
+* dôležitosť premenných určených metódou **neurónová sieť**
+
+![predikcia_flowchart](Obrázky/varimp_nn.png)
+
+
+
+# Ďakujem za pozornosť
+
+
+
